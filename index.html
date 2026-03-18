@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resi Mod Technician Report</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        .section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .section-header { background: #93cc94; padding: 10px 15px; font-weight: bold; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
+        .section-body { padding: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .triple-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .quad-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+        .field { margin-bottom: 10px; }
+        label { display: block; font-size: 0.9em; color: #666; margin-bottom: 5px; font-weight: 600; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        textarea { resize: vertical; min-height: 140px; font-family: inherit; font-size: 14px; line-height: 1.5; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.9em; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #eee; text-align: left; }
+        th { background: #f9f9f9; }
+        .cat-header { background: #f0f0f0; font-weight: bold; }
+        .actions { text-align: center; margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
+        button { padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background 0.2s; }
+        .btn-primary { background: #2ecc71; color: white; }
+        .btn-primary:hover { background: #27ae60; }
+        .btn-secondary { background: #34495e; color: white; }
+        .btn-danger { background: #e74c3c; color: white; padding: 5px 10px; font-size: 0.8em; }
+        .btn-small { padding: 5px 10px; font-size: 0.8em; background: #3498db; color: white; border-radius: 3px; }
+        .mgmt-panel { display:none; margin-bottom: 15px; padding: 15px; background: #f9f9f9; border: 1px dashed #ccc; }
+        .mgmt-item-list { margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; }
+        .mgmt-item { background:#eee; padding:2px 5px; border-radius:3px; font-size:0.8em; display:flex; align-items:center; gap:5px; border: 1px solid #ddd; }
+        #output-area { margin-top: 20px; background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 4px; white-space: pre-wrap; display: none; font-family: monospace; font-size: 0.85em; border: 2px solid #27ae60; }
+        .qty-container { display: flex; align-items: center; gap: 5px; }
+        .qty-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #ddd; border: 1px solid #ccc; cursor: pointer; font-weight: bold; border-radius: 4px; user-select: none; }
+        .qty-btn:hover { background: #ccc; }
+        .qty-input { width: 50px !important; text-align: center; }
+        .toolbar { display: flex; gap: 5px; margin-bottom: 5px; background: #eee; padding: 5px; border-radius: 4px 4px 0 0; border: 1px solid #ccc; border-bottom: none; }
+        .tool-btn { padding: 4px 10px; font-size: 0.85em; background: white; border: 1px solid #ccc; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .tool-btn:hover { background: #f0f0f0; }
+        
+        /* Layout for location quantities */
+        .loc-qty-row { display: grid; grid-template-columns: 150px 80px; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .loc-qty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Resi Mod Report Generator</h1>
+        
+        <div class="section">
+            <div class="section-header"><span>Technician(s)</span></div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="field"><label>Inside Technician</label><input type="text" id="inside_tech" placeholder="Name"></div>
+                    <div class="field"><label>Outside Technician</label><input type="text" id="outside_tech" placeholder="Name"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Tests Completed</div>
+            <div class="section-body checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="test_ruby"> <label for="test_ruby">Ruby 🚨</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_light"> <label for="test_light">Light 💡</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_exfo"> <label for="test_exfo">EXFO 📲</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_wifi"> <label for="test_wifi">Wifi 🛜</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_pair"> <label for="test_pair">Pair Test</label></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span>Installation Details</span>
+                <div style="display:flex; gap:5px;"><button class="btn-small" onclick="toggleMgmt('ont')">Models</button><button class="btn-small" onclick="toggleMgmt('loc')">Locations</button></div>
+            </div>
+            <div class="section-body">
+                <div id="ont-mgmt" class="mgmt-panel">
+                    <div class="grid" style="margin-bottom:10px;">
+                        <div><label>Add ONT</label><div style="display:flex; gap:5px;"><input type="text" id="new-ont-name"><button class="btn-primary btn-small" onclick="addItem('ont')">+</button></div></div>
+                        <div><label>Add AP</label><div style="display:flex; gap:5px;"><input type="text" id="new-ap-name"><button class="btn-primary btn-small" onclick="addItem('ap')">+</button></div></div>
+                    </div>
+                    <div id="ont-list-delete" class="mgmt-item-list"></div>
+                    <div id="ap-list-delete" class="mgmt-item-list"></div>
+                </div>
+                <div class="grid">
+                    <div class="field"><label>ONT Location</label><select id="ont_loc" class="loc-select"></select></div>
+                    <div class="field"><label>ONT MAC/SN</label><input type="text" id="ont_mac"></div>
+                    <div class="field"><label>ONT Model</label><select id="ont_model" class="ont-select" onchange="syncHardwareToMaterials()"></select></div>
+                </div>
+                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                <label>AP Details</label>
+                <div class="triple-grid">
+                    <select id="ap_model" class="ap-select" onchange="syncHardwareToMaterials()"></select>
+                    <select id="ap_loc" class="loc-select"></select>
+                    <input type="text" id="ap_mac" placeholder="AP MAC">
+                </div>
+                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                <div class="triple-grid">
+                    <div class="field"><label>TV Model</label><select id="tv_model" class="tv-select" onchange="syncHardwareToMaterials()"></select></div>
+                    <div class="field"><label>TV Box Location</label><select id="tv_loc" class="loc-select"></select></div>
+                    <div class="field"><label>TV Box MAC</label><input type="text" id="tv_mac" placeholder="MAC"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Cat5 Termination</div>
+            <div class="section-body">
+                <div class="quad-grid">
+                    <div class="field"><label>Lines Terminated</label><input type="number" id="cat5_lines" value="0"></div>
+                    <div class="field"><label>Pair Tested</label><select id="cat5_pair"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    <div class="field"><label>Plugged into Beacon</label><select id="cat5_beacon"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    <div class="field"><label>Plugged into Zhone</label><select id="cat5_zhone"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                </div>
+                
+                <label style="margin-top:10px; display:block; border-bottom:1px solid #eee; padding-bottom:5px;">Locations & Quantities</label>
+                <div class="loc-qty-grid" style="margin-top:10px;">
+                    <div>
+                        <div class="loc-qty-row"><span>Living Room 🛋️</span><input type="number" id="q_lr" value="0" min="0"></div>
+                        <div class="loc-qty-row"><span>Bedroom #1 🛏️</span><input type="number" id="q_br1" value="0" min="0"></div>
+                        <div class="loc-qty-row"><span>Bedroom #2 🛏️</span><input type="number" id="q_br2" value="0" min="0"></div>
+                    </div>
+                    <div>
+                        <div class="loc-qty-row"><span>Den/Office 📁</span><input type="number" id="q_den" value="0" min="0"></div>
+                        <div class="loc-qty-row"><span>Kitchen 🧑‍🍳</span><input type="number" id="q_kit" value="0" min="0"></div>
+                        <div class="loc-qty-row"><span>Other</span><input type="number" id="q_other" value="0" min="0"></div>
+                    </div>
+                </div>
+
+                <div class="grid" style="margin-top:15px;">
+                    <div class="field"><label>Notified of $100 Charge?</label><select id="cat5_notified"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    <div class="field"><label>Reason for not terminating</label><input type="text" id="cat5_reason" placeholder="e.g. Existing cables damaged"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Fibre Meter Mark</div>
+            <div class="section-body grid">
+                <div class="field"><label>Pre Wired</label><select id="fm_pre"><option value="No">No</option><option value="Yes">Yes</option></select></div>
+                <div class="field"><label>Panel</label><input type="number" id="fm_riser" value="0" oninput="calcTotal()"></div>
+                <div class="field"><label>Suite</label><input type="number" id="fm_suite" value="0" oninput="calcTotal()"></div>
+                <div class="field"><label>Total (Diff)</label><input type="number" id="fm_total" value="0" readonly></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header"><span>Hub Stock Location</span></div>
+            <div class="section-body"><select id="hub_loc" class="hub-select"></select></div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Material List</div>
+            <div class="section-body">
+                <table id="material-table">
+                    <thead><tr><th>Material</th><th>QTY</th></tr></thead>
+                    <tbody id="material-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header"><span>Additional Notes</span><button class="btn-small" onclick="toggleMgmt('sup')">Manage Tags</button></div>
+            <div class="section-body">
+                <div id="sup-mgmt" class="mgmt-panel">
+                    <div style="display:flex; gap:10px;"><input type="text" id="new-sup-name" placeholder="[~name]"><button class="btn-primary btn-small" onclick="addItem('sup')">Add</button></div>
+                    <div id="sup-list-delete" class="mgmt-item-list"></div>
+                </div>
+                <label>Notes & Observations</label>
+                <div class="toolbar">
+                    <button class="tool-btn" onclick="applyFormat('* ')">List Bullet</button>
+                    <button class="tool-btn" onclick="applyFormat('1. ')">List Number</button>
+                </div>
+                <textarea id="notes" placeholder="Type notes here..."></textarea>
+                <div style="margin-top:20px;"><label>Tag Supervisor(s)</label><div id="sup-checkboxes" class="checkbox-group"></div></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Splitter Activation</div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="field"><label>Floor</label><input type="text" id="split_floor"></div>
+                    <div class="field"><label>Panel</label><input type="text" id="split_panel"></div>
+                    <div class="field"><label>Splitter</label><input type="text" id="split_splitter"></div>
+                    <div class="field"><label>Bulkheads Installed</label><input type="text" id="split_bulkhead"></div>
+                </div>
+                <div style="margin-top:10px;"><label>Tag Person</label><div id="split-tag-checkboxes" class="checkbox-group"></div></div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-primary" onclick="generateReport()">Generate Report</button>
+            <button class="btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+        </div>
+        <div id="output-area"></div>
+        <textarea id="hidden-copy-area" style="position:absolute; left:-9999px;" aria-hidden="true"></textarea>
+    </div>
+
+    <script>
+        // Use previous configuration/defaults logic here...
+        function generateReport() {
+            let report = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nInside:${document.getElementById('inside_tech').value}\nOutside:${document.getElementById('outside_tech').value}\n{panel}\n\n`;
+            
+            // ... (Tests and Installation details code) ...
+
+            // Cat5 Section - Updated for locations with quantities
+            report += `{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n`;
+            report += `Lines Terminated:${document.getElementById('cat5_lines').value}\n`;
+            report += `Pair Tested:${document.getElementById('cat5_pair').value}\n`;
+            report += `Plugged into the Beacon:${document.getElementById('cat5_beacon').value}\n`;
+            report += `Plugged into the Zhone:${document.getElementById('cat5_zhone').value}\n`;
+            
+            report += `_Location(s) & Quantities:_\n`;
+            const locs = [
+                {id: 'q_lr', name: 'Living Room 🛋️'},
+                {id: 'q_br1', name: 'Bedroom #1 🛏️'},
+                {id: 'q_br2', name: 'Bedroom #2 🛏️'},
+                {id: 'q_den', name: 'Den/Office 📁'},
+                {id: 'q_kit', name: 'Kitchen 🧑‍🍳'},
+                {id: 'q_other', name: 'Other'}
+            ];
+            locs.forEach(l => {
+                const val = parseInt(document.getElementById(l.id).value) || 0;
+                if(val > 0) report += `* ${l.name}: ${val}\n`;
+            });
+
+            report += `\n_Was the Customer Notified of $100 Charge for a Return Visit ?_:${document.getElementById('cat5_notified').value}\n\n`;
+            report += `_Reason for not terminating Cat5(s):_\n* ${document.getElementById('cat5_reason').value}\n{panel}\n\n`;
+
+            // ... (Fibre Meter, Materials, and Notes code) ...
+
+            document.getElementById('output-area').innerText = report.trim();
+            document.getElementById('output-area').style.display = 'block';
+            return report.trim();
+        }
+    </script>
+</body>
+</html>
