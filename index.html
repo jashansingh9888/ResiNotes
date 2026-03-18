@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resi Mod Technician Report</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --secondary: #34495e;
+            --bg: #f4f7f6;
+            --header-bg: #93cc94;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); padding: 15px; color: #333; line-height: 1.4; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 25px; font-size: 1.8em; }
+        .section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; overflow: hidden; background: #fff; }
+        .section-header { background: var(--header-bg); padding: 12px 15px; font-weight: bold; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; color: #2c3e50; }
+        .section-body { padding: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .triple-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .field { margin-bottom: 12px; }
+        label { display: block; font-size: 0.85em; color: #555; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; /* Prevents iOS zoom on focus */ }
+        textarea { resize: vertical; min-height: 100px; font-family: inherit; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 0.9em; background: #f9f9f9; padding: 5px 10px; border-radius: 20px; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background: #f9f9f9; font-weight: bold; }
+        .cat-header { background: #f0f0f0; font-weight: bold; color: #555; }
+        .actions { text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center; position: sticky; bottom: 20px; }
+        button { padding: 15px 25px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-primary { background: var(--primary); color: white; flex: 2; }
+        .btn-secondary { background: var(--secondary); color: white; flex: 1; }
+        #output-area { margin-top: 20px; background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 6px; white-space: pre-wrap; display: none; font-family: 'Courier New', monospace; font-size: 0.85em; border: 2px solid var(--primary); }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+        @media (max-width: 600px) { .grid, .triple-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Resi Mod Report Generator</h1>
+        
+        <div class="section">
+            <div class="section-header">Technician(s)</div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="field"><label>Inside Technician</label><input type="text" id="inside_tech" placeholder="Name"></div>
+                    <div class="field"><label>Outside Technician</label><input type="text" id="outside_tech" placeholder="Name"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Tests Completed</div>
+            <div class="section-body checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="test_ruby"> <label for="test_ruby">Ruby 🚨</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_light"> <label for="test_light">Light 💡</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_exfo"> <label for="test_exfo">EXFO 📲</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_wifi"> <label for="test_wifi">Wifi 🛜</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_pair"> <label for="test_pair">Pair Test 🔌</label></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Installation Details</div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="field"><label>ONT Location</label><input type="text" id="ont_loc" value="Smart Panel"></div>
+                    <div class="field"><label>ONT MAC/SN</label><input type="text" id="ont_mac"></div>
+                    <div class="field">
+                        <label>ONT Model</label>
+                        <select id="ont_model">
+                            <option>Zhone - 5222XG</option>
+                            <option>Zhone - 2424GN</option>
+                            <option>Nokia XS-010X-R</option>
+                        </select>
+                    </div>
+                </div>
+                <hr>
+                <div class="grid">
+                    <div class="field"><label>AP Location</label><input type="text" id="ap_loc" value="Living Room"></div>
+                    <div class="field"><label>AP MAC</label><input type="text" id="ap_mac"></div>
+                    <div class="field">
+                        <label>AP Model</label>
+                        <select id="ap_model">
+                            <option>Nokia Beacon 19</option>
+                            <option>Airties 4960x</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Cat5 Termination</div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="field"><label>Lines Terminated</label><input type="text" id="cat5_lines" placeholder="e.g. 3 Lines"></div>
+                    <div class="field"><label>Pair Tested</label><select id="cat5_pair"><option>Yes</option><option>No</option></select></div>
+                    <div class="field"><label>Plugged into Beacon</label><select id="cat5_beacon"><option>Yes</option><option>No</option></select></div>
+                    <div class="field"><label>Plugged into Zhone</label><select id="cat5_zhone"><option>Yes</option><option>No</option></select></div>
+                </div>
+                <div class="field">
+                    <label>Locations Terminated</label>
+                    <textarea id="cat5_loc_details" placeholder="e.g. Living Room, Bedroom 1, Kitchen"></textarea>
+                </div>
+                <div class="field">
+                    <label>Customer Notified of $100 Charge for Return Visit?</label>
+                    <select id="cat5_notified"><option>Yes</option><option>No</option></select>
+                </div>
+                <div class="field">
+                    <label>Reason for not terminating (if applicable)</label>
+                    <input type="text" id="cat5_reason" placeholder="e.g. Lines damaged in wall">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Fibre Meter Mark</div>
+            <div class="section-body grid">
+                <div class="field"><label>Panel Mark</label><input type="number" id="fm_riser" value="0" oninput="calcTotal()"></div>
+                <div class="field"><label>Suite Mark</label><input type="number" id="fm_suite" value="0" oninput="calcTotal()"></div>
+                <div class="field"><label>Total Length</label><input type="text" id="fm_total" readonly value="0m"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Material List</div>
+            <div class="section-body" style="padding:0;">
+                <table id="material-table">
+                    <thead><tr><th>Material</th><th>QTY</th></tr></thead>
+                    <tbody id="material-body">
+                        <tr class="cat-header"><td colspan="2">Hardware</td></tr>
+                        <tr><td>5222XG Zhone (1002324)</td><td><input type="number" class="mat-qty" data-sap="1002324" data-name="5222XG Zhone" value="0"></td></tr>
+                        <tr><td>Nokia Beacon 19 (1002555)</td><td><input type="number" class="mat-qty" data-sap="1002555" data-name="Nokia Beacon 19" value="0"></td></tr>
+                        <tr class="cat-header"><td colspan="2">Consumables</td></tr>
+                        <tr><td>LC APC Connector (1001083)</td><td><input type="number" class="mat-qty" data-sap="1001083" data-name="LC APC Connector" value="0"></td></tr>
+                        <tr><td>RJ45 Connector (1000289)</td><td><input type="number" class="mat-qty" data-sap="1000289" data-name="RJ45 Connector" value="0"></td></tr>
+                        <tr><td>Fibre Jack (1002322)</td><td><input type="number" class="mat-qty" data-sap="1002322" data-name="Fibre Jack" value="0"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Additional Notes & Supervisors</div>
+            <div class="section-body">
+                <textarea id="notes" placeholder="Enter any additional details here..."></textarea>
+                <label style="margin-top:15px;">Tag Supervisor(s)</label>
+                <div class="checkbox-group" id="sup-list">
+                    <div class="checkbox-item"><input type="checkbox" class="sup-check" value="[~nsukhdeo]"> <label>N. Sukhdeo</label></div>
+                    <div class="checkbox-item"><input type="checkbox" class="sup-check" value="[~jfasulo]"> <label>J. Fasulo</label></div>
+                    <div class="checkbox-item"><input type="checkbox" class="sup-check" value="[~adirlic]"> <label>A. Dirlic</label></div>
+                    <div class="checkbox-item"><input type="checkbox" class="sup-check" value="[~rnarine]"> <label>R. Narine</label></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-primary" onclick="generateReport()">Generate Report</button>
+            <button class="btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+        </div>
+        
+        <div id="output-area"></div>
+    </div>
+
+    <script>
+        function calcTotal() {
+            const p = Math.abs(parseInt(document.getElementById('fm_riser').value) || 0);
+            const s = Math.abs(parseInt(document.getElementById('fm_suite').value) || 0);
+            document.getElementById('fm_total').value = Math.abs(s - p) + "m";
+        }
+
+        function generateReport() {
+            let r = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n`;
+            r += `Inside: ${document.getElementById('inside_tech').value}\n`;
+            r += `Outside: ${document.getElementById('outside_tech').value}\n{panel}\n\n`;
+
+            r += `{panel:title=Tests Completed:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n`;
+            r += `Ruby: ${document.getElementById('test_ruby').checked ? '✅' : '❌'}\n`;
+            r += `Light: ${document.getElementById('test_light').checked ? '✅' : '❌'}\n`;
+            r += `EXFO: ${document.getElementById('test_exfo').checked ? '✅' : '❌'}\n`;
+            r += `Wifi: ${document.getElementById('test_wifi').checked ? '✅' : '❌'}\n`;
+            r += `Pair Test: ${document.getElementById('test_pair').checked ? '✅' : '❌'}\n{panel}\n\n`;
+
+            r += `{panel:title=Installation Details:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n`;
+            r += `*ONT:* ${document.getElementById('ont_model').value} | ${document.getElementById('ont_loc').value} | MAC: ${document.getElementById('ont_mac').value}\n`;
+            r += `*AP:* ${document.getElementById('ap_model').value} | ${document.getElementById('ap_loc').value} | MAC: ${document.getElementById('ap_mac').value}\n{panel}\n\n`;
+
+            r += `{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n`;
+            r += `Lines Terminated: ${document.getElementById('cat5_lines').value}\n`;
+            r += `Pair Tested: ${document.getElementById('cat5_pair').value}\n`;
+            r += `Plugged into Beacon: ${document.getElementById('cat5_beacon').value}\n`;
+            r += `Plugged into Zhone: ${document.getElementById('cat5_zhone').value}\n`;
+            r += `Locations: ${document.getElementById('cat5_loc_details').value}\n`;
+            r += `Notified of $100 Charge: ${document.getElementById('cat5_notified').value}\n`;
+            r += `Reason/Notes: ${document.getElementById('cat5_reason').value}\n{panel}\n\n`;
+
+            r += `{panel:title=Fibre Meter Mark:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nTotal Length: ${document.getElementById('fm_total').value}\n{panel}\n\n`;
+
+            r += `{panel:title=Material List:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n|| SAP || Materials || QTY ||\n`;
+            document.querySelectorAll('.mat-qty').forEach(input => {
+                if (parseInt(input.value) > 0) {
+                    r += `|${input.dataset.sap}|${input.dataset.name}|${input.value}|\n`;
+                }
+            });
+            r += `{panel}\n\n`;
+
+            const notes = document.getElementById('notes').value;
+            const sups = Array.from(document.querySelectorAll('.sup-check:checked')).map(c => c.value).join(' ');
+            if(notes || sups) {
+                r += `{panel:title=Additional Notes:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n${notes}\n\n${sups}\n{panel}`;
+            }
+
+            const out = document.getElementById('output-area');
+            out.innerText = r;
+            out.style.display = 'block';
+            return r;
+        }
+
+        function copyToClipboard() {
+            const text = generateReport();
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
