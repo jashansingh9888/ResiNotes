@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resi Mod Pro - Fully Customizable</title>
+    <style>
+        :root { --primary: #2ecc71; --secondary: #34495e; --bg: #f4f7f6; --header: #93cc94; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); padding: 10px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
+        .section-header { background: var(--header); padding: 10px 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .section-body { padding: 15px; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .field { margin-bottom: 10px; }
+        label { display: block; font-size: 0.8em; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+        
+        /* Management UI */
+        .mgmt-btn { background: #eee; border: 1px solid #ccc; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75em; }
+        .mgmt-panel { display: none; background: #f9f9f9; padding: 15px; border-bottom: 1px solid #ddd; }
+        .item-tag { display: inline-flex; align-items: center; background: #fff; border: 1px solid #ddd; padding: 5px 10px; border-radius: 20px; margin: 3px; font-size: 0.85em; }
+        .del-btn { color: #e74c3c; font-weight: bold; margin-left: 8px; cursor: pointer; border: none; background: none; }
+        
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .check-item { background: #f1f1f1; padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 5px; font-size: 0.9em; }
+        
+        .actions { display: flex; gap: 10px; margin-top: 20px; position: sticky; bottom: 10px; }
+        .btn { flex: 1; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; }
+        .btn-gen { background: var(--primary); }
+        .btn-copy { background: var(--secondary); }
+        
+        #output { margin-top: 15px; background: #2c3e50; color: #fff; padding: 15px; border-radius: 6px; white-space: pre-wrap; display: none; font-family: monospace; font-size: 0.8em; }
+        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Resi Mod Report Generator</h1>
+
+    <button class="mgmt-btn" onclick="toggleMgmt()">⚙️ Manage Dropdowns & Tags</button>
+    <div id="mgmt-panel" class="mgmt-panel">
+        <div class="field">
+            <label>Add New Option</label>
+            <div style="display:flex; gap:5px;">
+                <select id="mgmt-type">
+                    <option value="onts">ONT Model</option>
+                    <option value="aps">AP Model</option>
+                    <option value="sups">Supervisor</option>
+                </select>
+                <input type="text" id="mgmt-input" placeholder="Name/Value">
+                <button class="mgmt-btn" onclick="addItem()" style="background:var(--primary); color:white;">+</button>
+            </div>
+        </div>
+        <div id="item-list"></div>
+    </div>
+
+    <hr>
+
+    <div class="section">
+        <div class="section-header">Technicians</div>
+        <div class="section-body grid">
+            <input type="text" id="tech_in" placeholder="Inside Tech">
+            <input type="text" id="tech_out" placeholder="Outside Tech">
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Hardware Details</div>
+        <div class="section-body">
+            <div class="grid">
+                <div class="field"><label>ONT Model</label><select id="ont_select"></select></div>
+                <div class="field"><label>ONT MAC</label><input type="text" id="ont_mac"></div>
+                <div class="field"><label>AP Model</label><select id="ap_select"></select></div>
+                <div class="field"><label>AP MAC</label><input type="text" id="ap_mac"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Cat5 Termination</div>
+        <div class="section-body">
+            <div class="field"><label>Lines Terminated (Text Box)</label><input type="text" id="cat5_lines" placeholder="e.g. 4 Lines Terminated"></div>
+            <div class="grid">
+                <div class="field"><label>Pair Tested</label><select id="c5_pair"><option>Yes</option><option>No</option></select></div>
+                <div class="field"><label>Beacon Hookup</label><select id="c5_beacon"><option>Yes</option><option>No</option></select></div>
+            </div>
+            <textarea id="cat5_locs" placeholder="Locations: e.g. LR, BR1, Kitchen"></textarea>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Fibre Meter Mark</div>
+        <div class="section-body grid">
+            <input type="number" id="m_p" placeholder="Panel" oninput="calc()">
+            <input type="number" id="m_s" placeholder="Suite" oninput="calc()">
+            <input type="text" id="m_t" readonly placeholder="Total: 0m">
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">Tag Supervisors</div>
+        <div class="section-body checkbox-group" id="sup-checks"></div>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-gen" onclick="renderReport()">Generate</button>
+        <button class="btn btn-copy" onclick="copyReport()">Copy</button>
+    </div>
+
+    <div id="output"></div>
+</div>
+
+<script>
+    // Data Storage
+    let db = JSON.parse(localStorage.getItem('resiReportDB')) || {
+        onts: ["Zhone - 5222XG", "Zhone - 2424GN", "Nokia XS-010X-R"],
+        aps: ["Nokia Beacon 19", "Airties 4960x"],
+        sups: ["[~nsukhdeo]", "[~jfasulo]", "[~adirlic]", "[~rnarine]"]
+    };
+
+    function save() {
+        localStorage.setItem('resiReportDB', JSON.stringify(db));
+        updateUI();
+    }
+
+    function toggleMgmt() {
+        const p = document.getElementById('mgmt-panel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        updateMgmtList();
+    }
+
+    function addItem() {
+        const type = document.getElementById('mgmt-type').value;
+        const val = document.getElementById('mgmt-input').value.trim();
+        if(val) {
+            db[type].push(val);
+            document.getElementById('mgmt-input').value = '';
+            save();
+            updateMgmtList();
+        }
+    }
+
+    function deleteItem(type, index) {
+        db[type].splice(index, 1);
+        save();
+        updateMgmtList();
+    }
+
+    function updateMgmtList() {
+        const list = document.getElementById('item-list');
+        list.innerHTML = '';
+        ['onts', 'aps', 'sups'].forEach(type => {
+            db[type].forEach((item, i) => {
+                list.innerHTML += `<span class="item-tag">${type.toUpperCase()}: ${item} <button class="del-btn" onclick="deleteItem('${type}', ${i})">×</button></span>`;
+            });
+        });
+    }
+
+    function updateUI() {
+        // Update Dropdowns
+        const fill = (id, list) => {
+            const el = document.getElementById(id);
+            el.innerHTML = '<option value="">Select Option</option>' + list.map(x => `<option value="${x}">${x}</option>`).join('');
+        };
+        fill('ont_select', db.onts);
+        fill('ap_select', db.aps);
+
+        // Update Supervisor Checkboxes
+        const supArea = document.getElementById('sup-checks');
+        supArea.innerHTML = db.sups.map(s => `<div class="check-item"><input type="checkbox" class="sup-cb" value="${s}"> ${s}</div>`).join('');
+    }
+
+    function calc() {
+        const p = document.getElementById('m_p').value || 0;
+        const s = document.getElementById('m_s').value || 0;
+        document.getElementById('m_t').value = Math.abs(s - p) + "m";
+    }
+
+    function renderReport() {
+        let r = `{panel:title=Technicians:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nIn: ${document.getElementById('tech_in').value}\nOut: ${document.getElementById('tech_out').value}\n{panel}\n\n`;
+        
+        r += `{panel:title=Hardware:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nONT: ${document.getElementById('ont_select').value} | MAC: ${document.getElementById('ont_mac').value}\nAP: ${document.getElementById('ap_select').value} | MAC: ${document.getElementById('ap_mac').value}\n{panel}\n\n`;
+        
+        r += `{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nLines: ${document.getElementById('cat5_lines').value}\nPair Tested: ${document.getElementById('c5_pair').value}\nBeacon Hookup: ${document.getElementById('c5_beacon').value}\nLocs: ${document.getElementById('cat5_locs').value}\n{panel}\n\n`;
+        
+        r += `{panel:title=Fibre Marks:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nTotal: ${document.getElementById('m_t').value}\n{panel}\n\n`;
+
+        const selectedSups = Array.from(document.querySelectorAll('.sup-cb:checked')).map(c => c.value).join(' ');
+        if(selectedSups) r += `\n${selectedSups}`;
+
+        const out = document.getElementById('output');
+        out.innerText = r;
+        out.style.display = 'block';
+        return r;
+    }
+
+    function copyReport() {
+        const text = renderReport();
+        navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+    }
+
+    // Initialize
+    updateUI();
+</script>
+
+</body>
+</html>
