@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resi Mod Technician Report</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        .section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .section-header { background: #93cc94; padding: 10px 15px; font-weight: bold; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
+        .section-body { padding: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .triple-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .field { margin-bottom: 10px; }
+        label { display: block; font-size: 0.9em; color: #666; margin-bottom: 5px; font-weight: 600; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        textarea { resize: vertical; min-height: 140px; font-family: inherit; font-size: 14px; line-height: 1.5; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.9em; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #eee; text-align: left; }
+        th { background: #f9f9f9; }
+        .cat-header { background: #f0f0f0; font-weight: bold; }
+        .actions { text-align: center; margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
+        button { padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: bold; transition: background 0.2s; }
+        .btn-primary { background: #2ecc71; color: white; }
+        .btn-primary:hover { background: #27ae60; }
+        .btn-secondary { background: #34495e; color: white; }
+        .btn-danger { background: #e74c3c; color: white; padding: 5px 10px; font-size: 0.8em; }
+        .btn-small { padding: 5px 10px; font-size: 0.8em; background: #3498db; color: white; border-radius: 3px; }
+        .mgmt-panel { display:none; margin-bottom: 15px; padding: 15px; background: #f9f9f9; border: 1px dashed #ccc; }
+        .mgmt-item-list { margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; }
+        .mgmt-item { background:#eee; padding:2px 5px; border-radius:3px; font-size:0.8em; display:flex; align-items:center; gap:5px; border: 1px solid #ddd; }
+        #output-area { margin-top: 20px; background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 4px; white-space: pre-wrap; display: none; font-family: monospace; font-size: 0.85em; border: 2px solid #27ae60; }
+        .qty-container { display: flex; align-items: center; gap: 5px; }
+        .qty-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #ddd; border: 1px solid #ccc; cursor: pointer; font-weight: bold; border-radius: 4px; user-select: none; }
+        .qty-btn:hover { background: #ccc; }
+        .qty-input { width: 50px !important; text-align: center; }
+        .toolbar { display: flex; gap: 5px; margin-bottom: 5px; background: #eee; padding: 5px; border-radius: 4px 4px 0 0; border: 1px solid #ccc; border-bottom: none; }
+        .tool-btn { padding: 4px 10px; font-size: 0.85em; background: white; border: 1px solid #ccc; border-radius: 3px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .tool-btn:hover { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Resi Mod Report Generator</h1>
+        
+        <div class="section">
+            <div class="section-header"><span>Technician(s)</span></div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="field"><label>Inside Technician</label><input type="text" id="inside_tech"></div>
+                    <div class="field"><label>Outside Technician</label><input type="text" id="outside_tech"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Tests Completed</div>
+            <div class="section-body checkbox-group">
+                <div class="checkbox-item"><input type="checkbox" id="test_ruby"> <label for="test_ruby">Ruby 🚨</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_light"> <label for="test_light">Light 💡</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_exfo"> <label for="test_exfo">EXFO 📲</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_wifi"> <label for="test_wifi">Wifi 🛜</label></div>
+                <div class="checkbox-item"><input type="checkbox" id="test_pair"> <label for="test_pair">Pair Test</label></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <span>Installation Details</span>
+                <div style="display:flex; gap:5px;"><button class="btn-small" onclick="toggleMgmt('ont')">Models</button><button class="btn-small" onclick="toggleMgmt('loc')">Locations</button></div>
+            </div>
+            <div class="section-body">
+                <div id="ont-mgmt" class="mgmt-panel">
+                    <div class="grid">
+                        <div><label>Add ONT</label><div style="display:flex; gap:5px;"><input type="text" id="new-ont-name"><button class="btn-primary btn-small" onclick="addItem('ont')">+</button></div></div>
+                        <div><label>Add AP</label><div style="display:flex; gap:5px;"><input type="text" id="new-ap-name"><button class="btn-primary btn-small" onclick="addItem('ap')">+</button></div></div>
+                    </div>
+                    <div id="ont-list-delete" class="mgmt-item-list"></div>
+                    <div id="ap-list-delete" class="mgmt-item-list"></div>
+                </div>
+                <div class="grid">
+                    <div class="field"><label>ONT Location</label><select id="ont_loc" class="loc-select"></select></div>
+                    <div class="field"><label>ONT MAC/SN</label><input type="text" id="ont_mac"></div>
+                    <div class="field"><label>ONT Model</label><select id="ont_model" class="ont-select" onchange="syncHardware()"></select></div>
+                </div>
+                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                <div class="triple-grid">
+                    <select id="ap_model" class="ap-select" onchange="syncHardware()"></select>
+                    <select id="ap_loc" class="loc-select"></select>
+                    <input type="text" id="ap_mac" placeholder="AP MAC">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Cat5 Termination</div>
+            <div class="section-body">
+                <div class="grid">
+                    <div class="field"><label>Lines Terminated</label><input type="text" id="cat5_lines"></div>
+                    <div class="field"><label>Pair Tested</label><select id="cat5_pair"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    <div class="field"><label>Plugged into the Beacon</label><select id="cat5_beacon"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    <div class="field"><label>Plugged into the Zhone</label><select id="cat5_zhone"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                </div>
+                <label>Location(s)</label>
+                <div class="checkbox-group" style="margin-bottom:15px;">
+                    <div class="checkbox-item"><input type="checkbox" id="c5_l_lr"> <label for="c5_l_lr">Living Room 🛋️</label></div>
+                    <div class="checkbox-item"><input type="checkbox" id="c5_l_br1"> <label for="c5_l_br1">Bedroom #1🛏️</label></div>
+                    <div class="checkbox-item"><input type="checkbox" id="c5_l_br2"> <label for="c5_l_br2">Bedroom #2🛏️</label></div>
+                    <div class="checkbox-item"><input type="checkbox" id="c5_l_den"> <label for="c5_l_den">Den/Office 📁</label></div>
+                    <div class="checkbox-item"><input type="checkbox" id="c5_l_kit"> <label for="c5_l_kit">Kitchen 🧑‍🍳</label></div>
+                </div>
+                <div class="field">
+                    <label>Was the Customer Notified of $100 Charge for a Return Visit?</label>
+                    <select id="cat5_notified"><option value="">Select</option><option value="Yes">Yes</option><option value="No">No</option></select>
+                </div>
+                <div class="field">
+                    <label>Reason for not terminating Cat5(s)</label>
+                    <input type="text" id="cat5_reason" placeholder="Type reason here...">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Fibre Meter Mark</div>
+            <div class="section-body grid">
+                <div class="field"><label>Panel</label><input type="number" id="fm_riser" value="0" oninput="calcTotal()"></div>
+                <div class="field"><label>Suite</label><input type="number" id="fm_suite" value="0" oninput="calcTotal()"></div>
+                <div class="field"><label>Total</label><input type="number" id="fm_total" value="0" readonly></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Material List</div>
+            <div class="section-body">
+                <table id="material-table">
+                    <thead><tr><th>Material</th><th>QTY</th></tr></thead>
+                    <tbody id="material-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Additional Notes</div>
+            <div class="section-body">
+                <div class="toolbar">
+                    <button class="tool-btn" onclick="applyFormat('* ')">List Bullet</button>
+                    <button class="tool-btn" onclick="applyFormat('1. ')">List Number</button>
+                </div>
+                <textarea id="notes" placeholder="Notes..."></textarea>
+                <div id="sup-checkboxes" class="checkbox-group" style="margin-top:20px;"></div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-primary" onclick="generateReport()">Generate Report</button>
+            <button class="btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+        </div>
+        <div id="output-area"></div>
+        <textarea id="hidden-copy-area" style="position:absolute; left:-9999px;" aria-hidden="true"></textarea>
+    </div>
+
+    <script>
+        const defaults = {
+            hubs: ['960 Lawrence Avenue West', '2206 Eglinton Avenue East', '100 Humber College', 'Fibreco'],
+            locs: ["Smart Panel", "Ceiling Hatch", "Living Room", "Bedroom", "Den/Office"],
+            onts: ["Zhone - 5222XG", "Zhone - 2424GN", "Nokia XS-010X-R"],
+            aps: ["Nokia Beacon 19", "Airties 4960x"],
+            mats: [
+                {cat: 'Hardware', name: '5222XG Zhone', sap: 1002324},
+                {cat: 'Hardware', name: 'Nokia Beacon 19', sap: 1002555},
+                {cat: 'Fibre', name: 'LC APC Connector', sap: 1001083},
+                {cat: 'Copper', name: 'RJ45 Connector', sap: 1000289}
+            ],
+            sups: ["[~nsukhdeo]", "[~jfasulo]", "[~adirlic]", "[~rnarine]"]
+        };
+
+        function populate() {
+            const locs = defaults.locs;
+            document.querySelectorAll('.loc-select').forEach(s => s.innerHTML = '<option value="">Select Location</option>' + locs.map(l => `<option value="${l}">${l}</option>`).join(''));
+            document.querySelector('.ont-select').innerHTML = '<option value="">Select ONT</option>' + defaults.onts.map(o => `<option value="${o}">${o}</option>`).join('');
+            document.querySelector('.ap-select').innerHTML = '<option value="">Select AP</option>' + defaults.aps.map(a => `<option value="${a}">${a}</option>`).join('');
+            
+            const body = document.getElementById('material-body');
+            body.innerHTML = defaults.mats.map(m => `<tr><td>${m.name}</td><td><input type="number" class="qty-input" data-sap="${m.sap}" data-name="${m.name}" data-cat="${m.cat}" value="0" min="0" style="width:60px"></td></tr>`).join('');
+            
+            const supDiv = document.getElementById('sup-checkboxes');
+            supDiv.innerHTML = defaults.sups.map(s => `<div class="checkbox-item"><input type="checkbox" class="sup-check" value="${s}" id="s-${s}"><label for="s-${s}">${s}</label></div>`).join('');
+        }
+
+        function applyFormat(p) {
+            const t = document.getElementById('notes');
+            const s = t.selectionStart, e = t.selectionEnd, val = t.value;
+            const sel = val.substring(s, e);
+            const res = sel.length > 0 ? sel.split('\n').map(l => p + l).join('\n') : p;
+            t.value = val.substring(0, s) + res + val.substring(e);
+            t.focus();
+        }
+
+        function calcTotal() {
+            const p = parseInt(document.getElementById('fm_riser').value) || 0;
+            const s = parseInt(document.getElementById('fm_suite').value) || 0;
+            document.getElementById('fm_total').value = Math.abs(s - p);
+        }
+
+        function generateReport() {
+            let r = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nInside:${document.getElementById('inside_tech').value}\nOutside:${document.getElementById('outside_tech').value}\n{panel}\n\n`;
+            
+            // Cat5 Section
+            r += `{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nLines Terminated:${document.getElementById('cat5_lines').value}\nPair Tested:${document.getElementById('cat5_pair').value}\nPlugged into the Beacon:${document.getElementById('cat5_beacon').value}\nPlugged into the Zhone:${document.getElementById('cat5_zhone').value}\n_Location(s):_\n`;
+            if(document.getElementById('c5_l_lr').checked) r += `Living Room 🛋️:Yes\n`;
+            if(document.getElementById('c5_l_br1').checked) r += `Bedroom #1🛏️:Yes\n`;
+            if(document.getElementById('c5_l_br2').checked) r += `Bedroom #2🛏️:Yes\n`;
+            if(document.getElementById('c5_l_den').checked) r += `Den/Office 📁:Yes\n`;
+            if(document.getElementById('c5_l_kit').checked) r += `Kitchen 🧑‍🍳:Yes\n`;
+            r += `_Was the Customer Notified of $100 Charge for a Return Visit ?_:${document.getElementById('cat5_notified').value}\n\n_Reason for not terminating Cat5(s):_\n* ${document.getElementById('cat5_reason').value}\n{panel}\n\n`;
+
+            r += `{panel:title=Fibre Meter Mark:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nTotal = ${document.getElementById('fm_total').value}\n{panel}\n\n`;
+
+            r += `{panel:title=Material List:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n|| SAP || Materials || QTY ||\n`;
+            Array.from(document.querySelectorAll('.qty-input')).filter(i => i.value > 0).forEach(i => {
+                r += `|${i.dataset.sap}|${i.dataset.name}|${i.value}|\n`;
+            });
+            r += `{panel}\n\n`;
+
+            const n = document.getElementById('notes').value;
+            const sups = Array.from(document.querySelectorAll('.sup-check:checked')).map(c => c.value).join(' ');
+            if(n || sups) r += `{panel:title=Additional Notes:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n${n}\n\n${sups}\n{panel}`;
+
+            document.getElementById('output-area').innerText = r;
+            document.getElementById('output-area').style.display = 'block';
+            return r;
+        }
+
+        function copyToClipboard() {
+            const text = generateReport();
+            const el = document.getElementById('hidden-copy-area');
+            el.value = text;
+            el.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard!');
+        }
+
+        window.onload = populate;
+    </script>
+</body>
+</html>
