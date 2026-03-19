@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira Note Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .form-card { @apply bg-white p-5 rounded-lg shadow-md mb-6 border border-gray-200; }
+        label { @apply block text-sm font-bold text-gray-700 mb-1; }
+        input, select { @apply w-full p-2 border rounded focus:ring-2 focus:ring-green-400 outline-none mb-3; }
+        .checkbox-group { @apply flex items-center gap-2 text-sm mb-2; }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 pb-24">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold text-center mb-6 text-green-800 uppercase tracking-widest">Jira Tech Note Tool</h1>
+
+        <div class="form-card">
+            <div class="grid grid-cols-2 gap-4">
+                <div><label>Inside Tech</label><input type="text" id="t_in" placeholder="Jashandeep Singh Sidhu"></div>
+                <div><label>Outside Tech</label><input type="text" id="t_out" placeholder="Yuan Tian"></div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <label>ONT Location</label><input type="text" id="ont_loc" placeholder="Smart Panel">
+            <label>ONT Model</label><input type="text" id="ont_model" placeholder="Zhone - 5222XG">
+            <div class="grid grid-cols-2 mt-2">
+                <div class="checkbox-group"><input type="checkbox" id="c_ruby" checked> Ruby 🚨</div>
+                <div class="checkbox-group"><input type="checkbox" id="c_light" checked> Light 💡</div>
+                <div class="checkbox-group"><input type="checkbox" id="c_exfo" checked> EXFO 📲</div>
+                <div class="checkbox-group"><input type="checkbox" id="c_wifi" checked> Wifi 🛜</div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <h3 class="font-bold border-b mb-3">Cat5 Termination</h3>
+            <div class="space-y-1">
+                <div class="checkbox-group"><input type="checkbox" class="room-cb" data-r="Living Room 🛋️"> Living Room 🛋️</div>
+                <div class="checkbox-group"><input type="checkbox" class="room-cb" data-r="Bedroom #1🛏️"> Bedroom #1🛏️</div>
+                <div class="checkbox-group"><input type="checkbox" class="room-cb" data-r="Bedroom #2🛏️"> Bedroom #2🛏️</div>
+                <div class="checkbox-group"><input type="checkbox" class="room-cb" data-r="Den/Office 📁"> Den/Office 📁</div>
+                <div class="checkbox-group"><input type="checkbox" class="room-cb" data-r="Kitchen 🧑‍🍳"> Kitchen 🧑‍🍳</div>
+            </div>
+            <label class="mt-4">Reason for not terminating:</label>
+            <input type="text" id="cat5_reason">
+        </div>
+
+        <div class="form-card">
+            <h3 class="font-bold border-b mb-3 text-green-600">Materials Used</h3>
+            <input type="text" id="m_search" placeholder="Search Materials..." onkeyup="filterM()" class="bg-white border-green-200">
+            <div id="m_list" class="max-h-60 overflow-y-auto space-y-2"></div>
+        </div>
+
+        <div class="form-card">
+            <div class="grid grid-cols-2 gap-4">
+                <div><label>Total Meter (m)</label><input type="text" id="m_total"></div>
+                <div><label>Hub Stock Location</label><select id="hub_loc"></select></div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex gap-2 shadow-inner">
+            <button onclick="copyNote()" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition uppercase">GENERATE & COPY JIRA NOTE</button>
+        </div>
+    </div>
+
+    <script>
+        let mats = [];
+        async function load() {
+            try {
+                const res = await fetch('data.json');
+                const d = await res.json();
+                mats = d.materials;
+                const hSel = document.getElementById('hub_loc');
+                d.hubs.forEach(h => {
+                    const o = document.createElement('option');
+                    o.value = h.name; 
+                    o.textContent = h.name; 
+                    hSel.appendChild(o);
+                });
+                renderM(mats);
+            } catch(e) { console.error("Could not load data.json"); }
+        }
+
+        function renderM(list) {
+            const c = document.getElementById('m_list');
+            c.innerHTML = '';
+            list.forEach(m => {
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center text-sm p-1 border-b";
+                row.innerHTML = `<span>${m.name}</span><input type="number" data-sap="${m.sap}" data-name="${m.name}" data-cat="${m.cat}" class="qty-in w-16 p-1 border rounded text-center font-bold" value="0" min="0">`;
+                c.appendChild(row);
+            });
+        }
+
+        function filterM() {
+            const q = document.getElementById('m_search').value.toLowerCase();
+            renderM(mats.filter(m => m.name.toLowerCase().includes(q) || m.sap.includes(q)));
+        }
+
+        function copyNote() {
+            const val = (id) => document.getElementById(id).value || "";
+            const chk = (id) => document.getElementById(id).checked ? "Yes" : "No";
+
+            let note = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\t\t\t\nInside:\t${val('t_in')}\t\t\nOutside:\t${val('t_out')}\t\t\n{panel}\t\t\t\n`;
+            
+            note += `{panel:title=Tests Completed:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\t\t\t\nRuby 🚨:\t${chk('c_ruby')}\t\t\nLight 💡:\t${chk('c_light')}\t\t\nEXFO 📲:\t${chk('c_exfo')}\t\t\nWifi 🛜:\t${chk('c_wifi')}\t\t\nPair Test:\tYes\t\t\n{panel}\t\t\t\n`;
+
+            note += `{panel:title=Installation Details:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\t\t\t\n*ONT Location*:\t${val('ont_loc')}\t\t\n*ONT MAC/SN*:\t\t\t\nONT Model: \t${val('ont_model')}\t\t\n*AP Location*: \t\t\t\n*AP MAC*:\t\t\t\nAP Model:\t\t\t\n*TV Box Location*: \t\t\t\n*TV Box MAC*:\t\t \t\nTV Box Model:\t\t\t\n*Phone Location*:\t\t\t\n*Phone Number*:\t\t\t\n{panel}\t\t\t\n`;
+
+            note += `{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\t\t\t\nLines Terminated:\t\t\t\nPair Tested:\t\t\t\n_Location(s):_\t\t\t\n`;
+            document.querySelectorAll('.room-cb').forEach(r => {
+                note += `${r.dataset.r}:\t${r.checked ? 'Yes' : ''}\t\t\n`;
+            });
+            note += `_Reason for not terminating Cat5(s):_\t\t\t\n* ${val('cat5_reason')}\t\t\n{panel}\t\t\t\n`;
+
+            note += `{panel:title=Fibre Meter Mark:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\t\t\t\nTotal =\t${val('m_total')}m\t\t\n{panel}\t\t\t\n`;
+
+            note += `{panel:title=Hub Stock Location:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\t\t\t\nLocation:\t${val('hub_loc')}\t\t\n{panel}\t\t\t\n`;
+
+            note += `{panel:title=Material List:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\t\t\t\n`;
+            ["Hardware", "Fibre", "Copper", "Others"].forEach(cat => {
+                let items = "";
+                document.querySelectorAll('.qty-in').forEach(i => {
+                    if(i.dataset.cat === cat && i.value > 0) items += `|${i.dataset.sap}|\t${i.dataset.name}\t|${i.value}|\t\n`;
+                });
+                if(items) note += `h5._${cat}_\t\t\t\n|| SAP ||\tMaterials\t|| QTY ||\t\n${items}`;
+            });
+            note += `{panel}\t\t\t\n`;
+
+            const el = document.createElement('textarea');
+            el.value = note; document.body.appendChild(el); el.select();
+            document.execCommand('copy'); document.body.removeChild(el);
+            alert("✅ Final Jira Format Copied!");
+        }
+        window.onload = load;
+    </script>
+</body>
+</html>
