@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resi Tech Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .section-card { @apply bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-4; }
+        .label-style { @apply block text-[10px] font-black text-gray-400 uppercase mb-1 tracking-tighter; }
+        input[type="text"], select { @apply w-full p-2 bg-gray-50 border rounded text-sm outline-none focus:border-green-500; }
+        .room-row { @apply flex items-center justify-between py-1 border-b border-gray-50 last:border-0; }
+    </style>
+</head>
+<body class="bg-gray-50 pb-24 text-gray-800">
+
+    <div class="max-w-xl mx-auto p-4">
+        <h1 class="text-xl font-black text-center py-4 text-green-700">JIRA NOTE GENERATOR</h1>
+
+        <div class="section-card border-t-4 border-t-green-500">
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="label-style">Inside Tech</label><input type="text" id="tech_in" placeholder="Name"></div>
+                <div><label class="label-style">Outside Tech</label><input type="text" id="tech_out" placeholder="Name"></div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <label class="label-style">ONT Details</label>
+            <input type="text" id="ont_loc" placeholder="ONT Location" class="mb-3">
+            <div class="grid grid-cols-3 gap-2 text-[10px] font-bold">
+                <label class="flex items-center gap-1"><input type="checkbox" id="t_ruby" checked> RUBY</label>
+                <label class="flex items-center gap-1"><input type="checkbox" id="t_light" checked> LIGHT</label>
+                <label class="flex items-center gap-1"><input type="checkbox" id="t_wifi" checked> WIFI</label>
+            </div>
+        </div>
+
+        <div class="section-card border-t-4 border-t-blue-400">
+            <h3 class="text-xs font-bold mb-3 text-blue-600">CAT5 TERMINATION</h3>
+            <div class="space-y-1">
+                <div class="room-row"><span>Living Room 🛋️</span><input type="checkbox" class="room-check" data-room="Living Room 🛋️"></div>
+                <div class="room-row"><span>Bedroom #1 🛏️</span><input type="checkbox" class="room-check" data-room="Bedroom #1 🛏️"></div>
+                <div class="room-row"><span>Bedroom #2 🛏️</span><input type="checkbox" class="room-check" data-room="Bedroom #2 🛏️"></div>
+                <div class="room-row"><span>Den/Office 📁</span><input type="checkbox" class="room-check" data-room="Den/Office 📁"></div>
+                <div class="room-row"><span>Kitchen 🧑‍🍳</span><input type="checkbox" class="room-check" data-room="Kitchen 🧑‍🍳"></div>
+            </div>
+            <input type="text" id="cat5_reason" placeholder="Reason if not terminated" class="mt-3 text-xs">
+        </div>
+
+        <div class="section-card">
+            <h3 class="text-xs font-bold mb-2 text-green-600">MATERIALS</h3>
+            <input type="text" id="mat_search" onkeyup="filterMats()" placeholder="Search SAP..." class="mb-3">
+            <div id="mat_list" class="space-y-2 max-h-48 overflow-y-auto pr-2 text-sm"></div>
+        </div>
+
+        <div class="section-card">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div><label class="label-style">Hub Location</label><select id="hub_loc"></select></div>
+                <div><label class="label-style">Total Fiber (m)</label><input type="text" id="f_total" placeholder="0"></div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t flex gap-2">
+            <button onclick="generateNote()" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg shadow-lg active:bg-green-700">COPY JIRA NOTE</button>
+            <button onclick="window.location.reload()" class="bg-gray-200 px-4 rounded-lg text-xs">RESET</button>
+        </div>
+    </div>
+
+    <script>
+        let materials = [];
+        async function loadData() {
+            const res = await fetch('data.json');
+            const data = await res.json();
+            materials = data.materials;
+            const hubSelect = document.getElementById('hub_loc');
+            data.hubs.forEach(h => {
+                const opt = document.createElement('option');
+                opt.value = h.super;
+                opt.textContent = h.name;
+                hubSelect.appendChild(opt);
+            });
+            renderMats(materials);
+        }
+
+        function renderMats(list) {
+            const container = document.getElementById('mat_list');
+            container.innerHTML = '';
+            list.forEach(m => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center border-b pb-1";
+                div.innerHTML = `<span>${m.name}</span><input type="number" data-sap="${m.sap}" data-name="${m.name}" data-cat="${m.cat}" class="qty-in w-12 border rounded text-center" value="0" min="0">`;
+                container.appendChild(div);
+            });
+        }
+
+        function filterMats() {
+            const q = document.getElementById('mat_search').value.toLowerCase();
+            renderMats(materials.filter(m => m.name.toLowerCase().includes(q) || m.sap.includes(q)));
+        }
+
+        function generateNote() {
+            const val = (id) => document.getElementById(id).value || "---";
+            const check = (id) => document.getElementById(id).checked ? "Yes" : "No";
+
+            let n = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nInside: ${val('tech_in')}\nOutside: ${val('tech_out')}\n{panel}\n\n`;
+            
+            n += `{panel:title=Tests Completed:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nRuby 🚨: ${check('t_ruby')}\nLight 💡: ${check('t_light')}\nWifi 🛜: ${check('t_wifi')}\n{panel}\n\n`;
+
+            n += `{panel:title=Installation Details:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n*ONT Location*: ${val('ont_loc')}\n{panel}\n\n`;
+
+            // Cat5 Section
+            n += `{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n_Location(s):_\n`;
+            document.querySelectorAll('.room-check').forEach(c => {
+                if(c.checked) n += `${c.dataset.room}: Yes\n`;
+            });
+            if(val('cat5_reason') !== "---") n += `\n_Reason for not terminating:_ ${val('cat5_reason')}\n`;
+            n += `{panel}\n\n`;
+
+            // Materials
+            n += `{panel:title=Material List:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\n`;
+            ["Hardware", "Fibre", "Copper", "Others"].forEach(c => {
+                let items = "";
+                document.querySelectorAll('.qty-in').forEach(i => {
+                    if(i.dataset.cat === c && i.value > 0) items += `|${i.dataset.sap}| ${i.dataset.name} |${i.value}|\n`;
+                });
+                if(items) n += `h5._${c}_\n|| SAP || Materials || QTY ||\n${items}`;
+            });
+            n += `{panel}\n\n`;
+
+            n += `{panel:title=Fibre Meter Mark:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}\nTotal = ${val('f_total')}m\n{panel}\n\n`;
+            n += document.getElementById('hub_loc').value;
+
+            const t = document.createElement("textarea");
+            document.body.appendChild(t); t.value = n; t.select();
+            document.execCommand("copy"); document.body.removeChild(t);
+            alert("Note Copied!");
+        }
+        window.onload = loadData;
+    </script>
+</body>
+</html>
