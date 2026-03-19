@@ -1,9 +1,0 @@
-{
-  "materials": [
-    {"sap": "1002324", "name": "5222XG Zhone", "cat": "Hardware"},
-    {"sap": "1002555", "name": "Nokia Beacon 19", "cat": "Hardware"},
-    {"sap": "1002322", "name": "Fibre Jack", "cat": "Fibre"},
-    {"sap": "1000289", "name": "RJ45 Connector", "cat": "Copper"},
-    {"sap": "1000520", "name": "White Jacks", "cat": "Copper"}
-  ]
-}
