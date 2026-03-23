@@ -3,48 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beanfield Master Report Gen</title>
+    <title>Beanfield Master Report</title>
     <style>
         :root { --jira-green: #93cc94; --jira-blue: #0052cc; --jira-bg: #f4f5f7; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--jira-bg); padding: 10px; color: #172b4d; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .section { margin-bottom: 20px; padding: 15px; border: 1px solid #dfe1e6; border-radius: 5px; }
         h3 { margin-top: 0; color: #0747a6; border-bottom: 2px solid var(--jira-green); padding-bottom: 5px; font-size: 16px; }
-        
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
         .field-group { display: flex; flex-direction: column; margin-bottom: 8px; }
         label { font-size: 11px; font-weight: bold; color: #5e6c84; margin-bottom: 4px; text-transform: uppercase; }
         input, select { padding: 8px; border: 1px solid #dfe1e6; border-radius: 3px; font-size: 14px; }
+        
+        /* Catalog Styling */
+        #catSearch { width: 100%; padding: 10px; margin-bottom: 10px; border: 2px solid var(--jira-green); border-radius: 5px; }
+        .catalog-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; background: #fafbfc; padding: 10px; border: 1px solid #ddd; }
+        .item-btn { width: 100%; text-align: left; background: white; border: 1px solid #ddd; padding: 6px; font-size: 11px; cursor: pointer; display: flex; justify-content: space-between; border-radius: 3px; }
+        .item-btn:hover { background: #eef9ee; border-color: var(--jira-green); }
 
-        /* Catalog & Search */
-        #catSearch { width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid var(--jira-green); border-radius: 5px; box-sizing: border-box; }
-        .catalog-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto; background: #fafbfc; padding: 10px; border: 1px solid #ddd; }
-        .item-btn { width: 100%; text-align: left; background: white; border: 1px solid #ddd; padding: 6px; margin-bottom: 3px; font-size: 11px; cursor: pointer; display: flex; justify-content: space-between; }
-        .item-btn:hover { background: #eef9ee; }
+        /* Active List */
+        .mat-row { display: grid; grid-template-columns: 100px 1fr 60px 40px; gap: 8px; margin-bottom: 5px; align-items: center; background: #fff; padding: 5px; border-radius: 3px; border: 1px solid #eee; }
+        .btn-del { background: #ff5630; color: white; border: none; cursor: pointer; border-radius: 3px; height: 30px; }
 
-        /* Materials Table */
-        .mat-row { display: grid; grid-template-columns: 100px 1fr 60px 40px; gap: 8px; margin-bottom: 5px; }
-        .btn-del { background: #ff5630; color: white; border: none; cursor: pointer; border-radius: 3px; }
-
+        /* Output Area */
         .controls { position: sticky; top: 0; background: white; padding: 10px 0; z-index: 100; border-bottom: 2px solid #eee; display: flex; gap: 10px; }
         button.primary { padding: 12px 20px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold; }
         .btn-gen { background: #36b37e; color: white; }
         .btn-copy { background: var(--jira-blue); color: white; }
-        
-        textarea { width: 100%; height: 250px; font-family: monospace; margin-top: 20px; padding: 15px; border: 2px dashed #ccc; box-sizing: border-box; }
+        textarea { width: 100%; height: 300px; font-family: 'Courier New', monospace; margin-top: 20px; padding: 15px; border: 2px dashed #ccc; box-sizing: border-box; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="controls">
-        <button class="primary btn-gen" onclick="generateMarkup()">Generate Full Jira Text</button>
+        <button class="primary btn-gen" onclick="generateMarkup()">Generate Full Report</button>
         <button class="primary btn-copy" onclick="copyToClipboard()">Copy to Clipboard</button>
     </div>
 
     <div class="section">
-        <h3>1. Technicians & Time</h3>
+        <h3>1. Tech & Time</h3>
         <div class="grid">
             <div class="field-group"><label>Inside Tech</label><input type="text" id="iTech" value="Yuan Tian"></div>
             <div class="field-group"><label>Outside Tech</label><input type="text" id="oTech" value="Jashandeep Singh Sidhu"></div>
@@ -55,52 +53,66 @@
     </div>
 
     <div class="section">
-        <h3>2. Installation Details</h3>
+        <h3>2. Install & Riser Info</h3>
         <div class="grid">
-            <div class="field-group"><label>ONT MAC</label><input type="text" id="ontMac"></div>
-            <div class="field-group"><label>AP MAC</label><input type="text" id="apMac"></div>
-            <div class="field-group"><label>Floor</label><input type="text" id="floor"></div>
-            <div class="field-group"><label>Port</label><input type="text" id="port"></div>
-            <div class="field-group"><label>Return MAC</label><input type="text" id="retMac"></div>
+            <div class="field-group"><label>ONT MAC</label><input type="text" id="ontMac" placeholder="ALCL..."></div>
+            <div class="field-group"><label>AP MAC</label><input type="text" id="apMac" placeholder="84:6E..."></div>
+            <div class="field-group"><label>Floor</label><input type="text" id="floor" value="31"></div>
+            <div class="field-group"><label>Panel/Switch</label><input type="text" id="panelSw" value="03"></div>
+            <div class="field-group"><label>Port</label><input type="text" id="port" value="35"></div>
+            <div class="field-group"><label>Return MAC</label><input type="text" id="retMac" placeholder="0002..."></div>
         </div>
     </div>
 
     <div class="section">
-        <h3>3. Cat5 / Termination</h3>
+        <h3>3. Cat5 Termination</h3>
         <div class="grid">
             <div class="field-group"><label>Lines Terminated</label><input type="text" id="catTerm" value="0/9"></div>
             <div class="field-group"><label>Pair Tested</label><input type="text" id="catPair" value="1/9"></div>
+            <div class="field-group"><label>Plugged to Beacon</label><input type="text" id="plugBeacon" value="0/9"></div>
+            <div class="field-group"><label>Plugged to Zhone</label><input type="text" id="plugZhone" value="1/9"></div>
             <div class="field-group"><label>Living Room Port</label><input type="text" id="lrPort" value="01"></div>
         </div>
     </div>
 
     <div class="section">
-        <h3>4. Material Search & Add</h3>
-        <input type="text" id="catSearch" placeholder="Search Materials or SAP codes..." onkeyup="filterCatalog()">
-        <div class="catalog-container" id="catalogBody">
-            </div>
-        <div id="activeMaterials" style="margin-top:15px;">
-            <label>Selected Materials:</label>
+        <h3>4. Material List</h3>
+        <input type="text" id="catSearch" placeholder="Search by item name or SAP code..." onkeyup="filterCatalog()">
+        <div class="catalog-box" id="catalogBody"></div>
+        <div id="activeMaterials" style="margin-top:15px; border-top: 1px solid #eee; padding-top:10px;">
+            <label style="display:block; margin-bottom:10px;">Selected Items:</label>
         </div>
     </div>
 
-    <textarea id="output" readonly></textarea>
+    <textarea id="output" readonly placeholder="Your formatted Jira text will appear here..."></textarea>
 </div>
 
 <script>
-const catalog = [
-    {n:"RJ45 Connector", s:"1000289", c:"Copper"}, {n:"2 Port Faceplate", s:"1001047", c:"Copper"},
-    {n:"Fibre Jack", s:"1002322", c:"Fibre"}, {n:"Heat Sleeve 40mm", s:"1000526", c:"Fibre"},
-    {n:"5222XG Zhone", s:"1002324", c:"Hardware"}, {n:"Nokia Beacon 19", s:"1002555", c:"Hardware"},
-    {n:"Nokia XS-010X-R", s:"1002557", c:"Hardware"}, {n:"Nokia ONT Mount - Factory", s:"1002573", c:"Other"},
-    {n:"SC APC SC APC Patches", s:"1002388", c:"Fibre"}, {n:"LC APC LC APC Patches", s:"1002335", c:"Fibre"},
-    {n:"Zhone 2424A1", s:"1001199", c:"Hardware"}, {n:"A1 Zhone Mount", s:"1000420", c:"Other"},
-    // Add all other items here following the same {n:"", s:"", c:""} format
+// Your complete material list
+const materials = [
+    // Copper
+    {n:"RJ45 Connector", s:"1000289"}, {n:"2 Port Faceplate", s:"1001047"}, {n:"4 Port Faceplate", s:"1001048"},
+    {n:"White Jacks", s:"1000520"}, {n:"Coax Insert", s:"1001049"}, {n:"3ft CAT5 Patch Cable", s:"1000254"},
+    {n:"5ft CAT5 Patch Cable", s:"1000497"}, {n:"10ft CAT5 Patch Cable", s:"1000253"},
+    // Fibre
+    {n:"Fibre Jack", s:"1002322"}, {n:"Heat Sleeve 40mm", s:"1000526"}, {n:"LC APC Connector", s:"1001083"},
+    {n:"SC APC SC APC Patches", s:"1002388"}, {n:"LC APC LC APC Patches", s:"1002335"}, {n:"Heat Sleeve 25mm", s:"1002592"},
+    {n:"Heat Sleeve 50mm", s:"1002593"}, {n:"APC LC APC SC Patches", s:"1002597"}, {n:"SC APC Connector", s:"1001084"},
+    {n:"LC UPC 250/900", s:"1000422"}, {n:"SC UPC", s:"1000476"}, {n:"APC Bulk Heads", s:"1001079"}, {n:"UPC Bulk Heads", s:"1000461"},
+    // Hardware
+    {n:"5222XG Zhone", s:"1002324"}, {n:"2424GN Zhone", s:"1002327"}, {n:"2424A1 Zhone", s:"1001199"},
+    {n:"2424A Zhone", s:"100446"}, {n:"2628A Zhone", s:"1001087"}, {n:"8 port GPON zhone", s:"1001204"},
+    {n:"Nokia Beacon 19", s:"1002555"}, {n:"Nokia XS-010X-R", s:"1002557"}, {n:"Airties 4960x", s:"1002344"},
+    {n:"Airties 4960", s:"1002207"}, {n:"Archer C20 (100MBS)", s:"1002407"}, {n:"TP LINK ARCHER AX23", s:"1002481"}, {n:"SML TV Box", s:"1001554"},
+    // Other
+    {n:"A1 Zhone Mount", s:"1000420"}, {n:"XGS / 2424GN Zhone Mount", s:"1002445"}, {n:"Nokia ONT Mount - Factory", s:"1002573"},
+    {n:"Nokia VOIP ONT mount - Factory", s:"1002572"}, {n:"Nokia ONT Mount - Custom", s:"1002589"}, {n:"Nokia VOIP ONT mount - Custom", s:"1002590"},
+    {n:"RJ11 Splitter (Dongle)", s:"1000501"}, {n:"HDMI Cable 6'", s:"1000952"}, {n:"Power Extension", s:"1001208"}
 ];
 
 function initCatalog() {
     const container = document.getElementById('catalogBody');
-    catalog.forEach(item => {
+    materials.forEach(item => {
         const btn = document.createElement('button');
         btn.className = 'item-btn';
         btn.innerHTML = `<span>${item.n}</span> <span style="color:#888">${item.s}</span>`;
@@ -111,11 +123,9 @@ function initCatalog() {
 }
 
 function filterCatalog() {
-    const query = document.getElementById('catSearch').value.toLowerCase();
+    const q = document.getElementById('catSearch').value.toLowerCase();
     const btns = document.getElementsByClassName('item-btn');
-    for (let b of btns) {
-        b.style.display = b.getAttribute('data-search').includes(query) ? "flex" : "none";
-    }
+    for (let b of btns) { b.style.display = b.getAttribute('data-search').includes(q) ? "flex" : "none"; }
 }
 
 function addMaterial(name, sap) {
@@ -127,186 +137,95 @@ function addMaterial(name, sap) {
 
 function generateMarkup() {
     const v = (id) => document.getElementById(id).value;
-    const duration = (() => {
-        const s = v('startTime').split(':'), e = v('endTime').split(':');
-        let d = (new Date(0,0,0,e[0],e[1])).getTime() - (new Date(0,0,0,s[0],s[1])).getTime();
-        if (d < 0) d += 86400000;
-        return `${Math.floor(d/3600000)}:${Math.floor((d%3600000)/60000).toString().padStart(2,'0')}:00`;
-    })();
+    
+    // Time Calculation
+    const start = v('startTime').split(':'), end = v('endTime').split(':');
+    let ms = (new Date(0,0,0,end[0],end[1])).getTime() - (new Date(0,0,0,start[0],start[1])).getTime();
+    if (ms < 0) ms += 86400000;
+    const dur = `${Math.floor(ms/3600000)}:${Math.floor((ms%3600000)/60000).toString().padStart(2,'0')}:00`;
 
-    let matRows = "";
-    const s = document.getElementsByClassName('m-sap'), n = document.getElementsByClassName('m-name'), q = document.getElementsByClassName('m-qty');
-    for(let i=0; i<s.length; i++) matRows += `|${s[i].value}|	{{${n[i].value}}}	|${q[i].value.toString().padStart(2,'0')}|	\n`;
-
-    const template = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
-Inside:	${v('iTech')} \nOutside: ${v('oTech')}
-{panel}
-{panel:title=Tests Completed:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
-Ruby 🚨: Yes | Light 💡: Yes | EXFO 📲: Yes | Wifi 🛜: Yes | Pair Test: Yes
-{panel}
-{panel:title=Installation Details:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
-*ONT Location*: Smart Panel | *ONT MAC*: ${v('ontMac')} | ONT Model: Nokia 10x-R
-*AP Location*: Living Room | *AP MAC*: ${v('apMac')} | AP Model: Nokia Beacon
-{panel}
-{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
-Lines Terminated: ${v('catTerm')} | Pair Tested: ${v('catPair')}
-_Location(s):_ Living Room 🛋️: ${v('lrPort')}
-{panel}
-{panel:title=Riser Info:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
-Floor: ${v('floor')} | Port: ${v('port')}
-{panel}
-{panel:title=Time on Site:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
-Start: ${v('startTime')} | End: ${v('endTime')} | *Total: ${duration}*
-{panel}
-{panel:title=Material List:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
-||_SAP_|| _Materials_ ||_QTY_||
-${matRows}{panel}
-{panel:title=Additional Notes:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
-Hardware Return MAC: ${v('retMac')} [~res-orders]
-{panel}`;
-
-    document.getElementById('output').value = template;
-}
-
-function copyToClipboard() {
-    const out = document.getElementById("output");
-    out.select(); document.execCommand("copy");
-    alert("Full report copied!");
-}
-
-window.onload = initCatalog;
-</script>
-</body>
-</html>
-        button.primary { padding: 12px 20px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold; }
-        .btn-gen { background: #36b37e; color: white; }
-        .btn-copy { background: var(--jira-blue); color: white; }
-        
-        textarea { width: 100%; height: 200px; font-family: monospace; margin-top: 20px; padding: 15px; border: 2px dashed #ccc; box-sizing: border-box; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="controls">
-        <button class="primary btn-gen" onclick="generateMarkup()">Generate Jira Text</button>
-        <button class="primary btn-copy" onclick="copyToClipboard()">Copy to Clipboard</button>
-    </div>
-
-    <div class="grid section">
-        <div class="field-group"><label>Outside Tech</label><input type="text" id="oTech" value="Jashandeep Singh Sidhu"></div>
-        <div class="field-group"><label>Start Time</label><input type="time" id="startTime" value="11:15"></div>
-        <div class="field-group"><label>End Time</label><input type="time" id="endTime" value="12:00"></div>
-        <div class="field-group"><label>ONT MAC</label><input type="text" id="ontMac" placeholder="ALCL..."></div>
-    </div>
-
-    <h3>Quick-Add Materials (Click to add)</h3>
-    <div class="catalog-container section">
-        <div class="cat-column" id="cat-copper"><h4>Copper</h4></div>
-        <div class="cat-column" id="cat-fibre"><h4>Fibre</h4></div>
-        <div class="cat-column" id="cat-hardware"><h4>Hardware</h4></div>
-        <div class="cat-column" id="cat-other"><h4>Other</h4></div>
-    </div>
-
-    <h3>Active Material List</h3>
-    <div id="activeMaterials" class="section">
-        </div>
-
-    <textarea id="output" readonly placeholder="Markup will appear here..."></textarea>
-</div>
-
-<script>
-const catalog = {
-    copper: [
-        ["RJ45 Connector", "1000289"], ["2 Port Faceplate", "1001047"], ["4 Port Faceplate", "1001048"],
-        ["White Jacks", "1000520"], ["Coax Insert", "1001049"], ["3ft CAT5 Patch", "1000254"],
-        ["5ft CAT5 Patch", "1000497"], ["10ft CAT5 Patch", "1000253"]
-    ],
-    fibre: [
-        ["Fibre Jack", "1002322"], ["Heat Sleeve 40mm", "1000526"], ["LC APC Connector", "1001083"],
-        ["SC APC SC APC Patches", "1002388"], ["LC APC LC APC Patches", "1002335"], ["Heat Sleeve 25mm", "1002592"],
-        ["Heat Sleeve 50mm", "1002593"], ["APC LC APC SC Patches", "1002597"], ["SC APC Connector", "1001084"],
-        ["LC UPC 250/900", "1000422"], ["SC UPC", "1000476"], ["APC Bulk Heads", "1001079"], ["UPC Bulk Heads", "1000461"]
-    ],
-    hardware: [
-        ["5222XG Zhone", "1002324"], ["2424GN Zhone", "1002327"], ["2424A1 Zhone", "1001199"],
-        ["2424A Zhone", "100446"], ["2628A Zhone", "1001087"], ["8 port GPON zhone", "1001204"],
-        ["Nokia Beacon 19", "1002555"], ["Nokia XS-010X-R", "1002557"], ["Airties 4960x", "1002344"],
-        ["Airties 4960", "1002207"], ["Archer C20", "1002407"], ["AX23 TP Link", "1002481"], ["SML TV Box", "1001554"]
-    ],
-    other: [
-        ["A1 Zhone Mount", "1000420"], ["XGS / 2424GN Mount", "1002445"], ["Nokia ONT Mount-Fact", "1002573"],
-        ["Nokia VOIP Mount-Fact", "1002572"], ["Nokia ONT Mount-Cust", "1002589"], ["Nokia VOIP Mount-Cust", "1002590"],
-        ["RJ11 Splitter", "1000501"], ["HDMI Cable 6'", "1000952"], ["Power Extension", "1001208"]
-    ]
-};
-
-// Build Catalog Buttons
-Object.keys(catalog).forEach(cat => {
-    const col = document.getElementById(`cat-${cat}`);
-    catalog[cat].forEach(item => {
-        const btn = document.createElement('button');
-        btn.className = 'item-btn';
-        btn.innerHTML = `${item[0]} <span>${item[1]}</span>`;
-        btn.onclick = () => addMaterial(item[0], item[1]);
-        col.appendChild(btn);
-    });
-});
-
-function addMaterial(name, sap) {
-    const container = document.getElementById('activeMaterials');
-    const div = document.createElement('div');
-    div.className = 'mat-row';
-    div.innerHTML = `
-        <input type="text" class="m-sap" value="${sap}">
-        <input type="text" class="m-name" value="${name}">
-        <input type="number" class="m-qty" value="1">
-        <button class="btn-del" onclick="this.parentElement.remove()">X</button>
-    `;
-    container.appendChild(div);
-}
-
-function calculateDuration(start, end) {
-    const s = start.split(':'), e = end.split(':');
-    const sd = new Date(0,0,0,s[0],s[1]), ed = new Date(0,0,0,e[0],e[1]);
-    let diff = ed.getTime() - sd.getTime();
-    if (diff < 0) diff += 86400000;
-    const h = Math.floor(diff/1000/60/60), m = Math.floor((diff/1000/60)%60);
-    return `${h}:${m < 10 ? '0' : ''}${m}:00`;
-}
-
-function generateMarkup() {
+    // Materials Loop
+    let matMarkup = "";
     const saps = document.getElementsByClassName('m-sap'), names = document.getElementsByClassName('m-name'), qtys = document.getElementsByClassName('m-qty');
-    let matRows = "";
     for(let i=0; i<saps.length; i++) {
-        matRows += `|${saps[i].value}|	{{${names[i].value}}}	|${qtys[i].value.toString().padStart(2, '0')}|	\n`;
+        matMarkup += `|${saps[i].value}|	{{${names[i].value}}}	|${qtys[i].value.toString().padStart(2,'0')}|	\n`;
     }
 
-    const duration = calculateDuration(document.getElementById('startTime').value, document.getElementById('endTime').value);
-
     const template = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
-Outside:	${document.getElementById('oTech').value} 		
-{panel}
-{panel:title=Time on Site:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
-* Start Time:	${document.getElementById('startTime').value}		
-* End Time:	${document.getElementById('endTime').value}		
-*Time on Site:	${duration}		
-{panel}
+Inside:	${v('iTech')} 		
+Outside:	${v('oTech')} 		
+{panel}			
+{panel:title=Network:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+Beanfield			
+{panel}			
+{panel:title=Tests Completed:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+Ruby 🚨:	Yes		
+Light 💡:	Yes		
+EXFO 📲:	Yes		
+Wifi 🛜:	Yes		
+Pair Test:	Yes		
+{panel}			
 {panel:title=Installation Details:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
-*ONT MAC/SN*:	${document.getElementById('ontMac').value}
+*ONT Location*:	Smart Panel		
+*ONT MAC/SN*:	${v('ontMac')}		
+ONT Model: 	Nokia - 10x-R		
+*AP Location*: 	Living Room		
+*AP MAC*:	${v('apMac')}		
+AP Model:	Nokia - Beacon		
+_If the Airties/Beacon was left in the closet, was the customer advised of possible issues with coverage?_			
+N/A			
+{panel}			
+{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+Lines Terminated:	${v('catTerm')}		
+Pair Tested:	${v('catPair')}		
+Plugged into the Beacon:	${v('plugBeacon')}		
+Plugged into the Zhone:	${v('plugZhone')}		
+_Location(s):_			
+Living Room 🛋️:	${v('lrPort')}		
+Bedroom #1🛏️:			
+Bedroom #2🛏️:			
+Den/Office 📁:			
+Kitchen 🧑‍🍳:			
+_Was the Customer Notified of $100 Charge for a Return Visit ?_			
+Yes			
+{panel}			
+{panel:title=Riser Info:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+Floor:	${v('floor')}		
+Panel:/Switch	${v('panelSw')}		
+Port:	${v('port')}		
+{panel}			
+{panel:title=Fibre Meter Mark:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+Pre Wired:	Yes		
+Riser =			
+Suite =			
+Total =	 m		
+{panel}			
+{panel:title=Time on Site:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+* Start Time:	${v('startTime')}		
+* End Time:	${v('endTime')}		
+*Time on Site:	${dur}		
+{panel}			
+{panel:title=Hub Stock Location:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+Location:	${v('hub')} 		
 {panel}			
 {panel:title=Material List:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
 ||_SAP_||	_Materials_	||_QTY_||	
-${matRows}
+${matMarkup}
+{panel}			
+{panel:title=Additional Notes:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+Hardware Return:			
+Mac: ${v('retMac')}			
+	[~res-orders]		
 {panel}`;
+
     document.getElementById('output').value = template;
 }
 
 function copyToClipboard() {
-    const out = document.getElementById("output");
-    out.select(); document.execCommand("copy");
-    alert("Copied!");
+    const o = document.getElementById("output"); o.select(); document.execCommand("copy"); alert("Report Copied!");
 }
+
+window.onload = initCatalog;
 </script>
 </body>
 </html>
