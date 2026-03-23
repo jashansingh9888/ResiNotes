@@ -3,37 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beanfield Field Report Generator</title>
+    <title>Beanfield Master Report Gen</title>
     <style>
         :root { --jira-green: #93cc94; --jira-blue: #0052cc; --jira-bg: #f4f5f7; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--jira-bg); padding: 10px; color: #172b4d; line-height: 1.4; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--jira-bg); padding: 10px; color: #172b4d; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* Layout Sections */
-        .section { margin-bottom: 25px; padding: 15px; border: 1px solid #dfe1e6; border-radius: 5px; }
+        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #dfe1e6; border-radius: 5px; }
         h3 { margin-top: 0; color: #0747a6; border-bottom: 2px solid var(--jira-green); padding-bottom: 5px; font-size: 16px; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-        .field-group { display: flex; flex-direction: column; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+        .field-group { display: flex; flex-direction: column; margin-bottom: 8px; }
         label { font-size: 11px; font-weight: bold; color: #5e6c84; margin-bottom: 4px; text-transform: uppercase; }
-        input { padding: 8px; border: 1px solid #dfe1e6; border-radius: 3px; font-size: 14px; }
+        input, select { padding: 8px; border: 1px solid #dfe1e6; border-radius: 3px; font-size: 14px; }
 
-        /* Catalog Styling */
-        .catalog-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; background: #fafbfc; padding: 10px; border-radius: 5px; }
-        .cat-column h4 { margin: 5px 0; font-size: 13px; color: #505f79; text-decoration: underline; }
-        .item-btn { 
-            display: block; width: 100%; text-align: left; background: white; border: 1px solid #ddd; 
-            padding: 6px 8px; margin-bottom: 4px; font-size: 12px; cursor: pointer; border-radius: 3px;
-        }
-        .item-btn:hover { background: #eef9ee; border-color: var(--jira-green); }
-        .item-btn span { color: #888; font-family: monospace; float: right; }
+        /* Catalog & Search */
+        #catSearch { width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid var(--jira-green); border-radius: 5px; box-sizing: border-box; }
+        .catalog-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; max-height: 300px; overflow-y: auto; background: #fafbfc; padding: 10px; border: 1px solid #ddd; }
+        .item-btn { width: 100%; text-align: left; background: white; border: 1px solid #ddd; padding: 6px; margin-bottom: 3px; font-size: 11px; cursor: pointer; display: flex; justify-content: space-between; }
+        .item-btn:hover { background: #eef9ee; }
 
         /* Materials Table */
-        .mat-row { display: grid; grid-template-columns: 120px 1fr 60px 40px; gap: 8px; margin-bottom: 5px; align-items: center; }
-        .btn-del { background: #ff5630; color: white; border: none; padding: 5px; cursor: pointer; border-radius: 3px; }
+        .mat-row { display: grid; grid-template-columns: 100px 1fr 60px 40px; gap: 8px; margin-bottom: 5px; }
+        .btn-del { background: #ff5630; color: white; border: none; cursor: pointer; border-radius: 3px; }
 
-        /* Controls */
-        .controls { position: sticky; top: 0; background: white; padding: 15px 0; z-index: 100; border-bottom: 2px solid #eee; display: flex; gap: 10px; }
+        .controls { position: sticky; top: 0; background: white; padding: 10px 0; z-index: 100; border-bottom: 2px solid #eee; display: flex; gap: 10px; }
+        button.primary { padding: 12px 20px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold; }
+        .btn-gen { background: #36b37e; color: white; }
+        .btn-copy { background: var(--jira-blue); color: white; }
+        
+        textarea { width: 100%; height: 250px; font-family: monospace; margin-top: 20px; padding: 15px; border: 2px dashed #ccc; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="controls">
+        <button class="primary btn-gen" onclick="generateMarkup()">Generate Full Jira Text</button>
+        <button class="primary btn-copy" onclick="copyToClipboard()">Copy to Clipboard</button>
+    </div>
+
+    <div class="section">
+        <h3>1. Technicians & Time</h3>
+        <div class="grid">
+            <div class="field-group"><label>Inside Tech</label><input type="text" id="iTech" value="Yuan Tian"></div>
+            <div class="field-group"><label>Outside Tech</label><input type="text" id="oTech" value="Jashandeep Singh Sidhu"></div>
+            <div class="field-group"><label>Start Time</label><input type="time" id="startTime" value="11:15"></div>
+            <div class="field-group"><label>End Time</label><input type="time" id="endTime" value="12:00"></div>
+            <div class="field-group"><label>Hub Location</label><input type="text" id="hub" value="2206 Eglinton"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>2. Installation Details</h3>
+        <div class="grid">
+            <div class="field-group"><label>ONT MAC</label><input type="text" id="ontMac"></div>
+            <div class="field-group"><label>AP MAC</label><input type="text" id="apMac"></div>
+            <div class="field-group"><label>Floor</label><input type="text" id="floor"></div>
+            <div class="field-group"><label>Port</label><input type="text" id="port"></div>
+            <div class="field-group"><label>Return MAC</label><input type="text" id="retMac"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>3. Cat5 / Termination</h3>
+        <div class="grid">
+            <div class="field-group"><label>Lines Terminated</label><input type="text" id="catTerm" value="0/9"></div>
+            <div class="field-group"><label>Pair Tested</label><input type="text" id="catPair" value="1/9"></div>
+            <div class="field-group"><label>Living Room Port</label><input type="text" id="lrPort" value="01"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>4. Material Search & Add</h3>
+        <input type="text" id="catSearch" placeholder="Search Materials or SAP codes..." onkeyup="filterCatalog()">
+        <div class="catalog-container" id="catalogBody">
+            </div>
+        <div id="activeMaterials" style="margin-top:15px;">
+            <label>Selected Materials:</label>
+        </div>
+    </div>
+
+    <textarea id="output" readonly></textarea>
+</div>
+
+<script>
+const catalog = [
+    {n:"RJ45 Connector", s:"1000289", c:"Copper"}, {n:"2 Port Faceplate", s:"1001047", c:"Copper"},
+    {n:"Fibre Jack", s:"1002322", c:"Fibre"}, {n:"Heat Sleeve 40mm", s:"1000526", c:"Fibre"},
+    {n:"5222XG Zhone", s:"1002324", c:"Hardware"}, {n:"Nokia Beacon 19", s:"1002555", c:"Hardware"},
+    {n:"Nokia XS-010X-R", s:"1002557", c:"Hardware"}, {n:"Nokia ONT Mount - Factory", s:"1002573", c:"Other"},
+    {n:"SC APC SC APC Patches", s:"1002388", c:"Fibre"}, {n:"LC APC LC APC Patches", s:"1002335", c:"Fibre"},
+    {n:"Zhone 2424A1", s:"1001199", c:"Hardware"}, {n:"A1 Zhone Mount", s:"1000420", c:"Other"},
+    // Add all other items here following the same {n:"", s:"", c:""} format
+];
+
+function initCatalog() {
+    const container = document.getElementById('catalogBody');
+    catalog.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'item-btn';
+        btn.innerHTML = `<span>${item.n}</span> <span style="color:#888">${item.s}</span>`;
+        btn.setAttribute('data-search', (item.n + item.s).toLowerCase());
+        btn.onclick = () => addMaterial(item.n, item.s);
+        container.appendChild(btn);
+    });
+}
+
+function filterCatalog() {
+    const query = document.getElementById('catSearch').value.toLowerCase();
+    const btns = document.getElementsByClassName('item-btn');
+    for (let b of btns) {
+        b.style.display = b.getAttribute('data-search').includes(query) ? "flex" : "none";
+    }
+}
+
+function addMaterial(name, sap) {
+    const div = document.createElement('div');
+    div.className = 'mat-row';
+    div.innerHTML = `<input type="text" class="m-sap" value="${sap}"><input type="text" class="m-name" value="${name}"><input type="number" class="m-qty" value="1"><button class="btn-del" onclick="this.parentElement.remove()">X</button>`;
+    document.getElementById('activeMaterials').appendChild(div);
+}
+
+function generateMarkup() {
+    const v = (id) => document.getElementById(id).value;
+    const duration = (() => {
+        const s = v('startTime').split(':'), e = v('endTime').split(':');
+        let d = (new Date(0,0,0,e[0],e[1])).getTime() - (new Date(0,0,0,s[0],s[1])).getTime();
+        if (d < 0) d += 86400000;
+        return `${Math.floor(d/3600000)}:${Math.floor((d%3600000)/60000).toString().padStart(2,'0')}:00`;
+    })();
+
+    let matRows = "";
+    const s = document.getElementsByClassName('m-sap'), n = document.getElementsByClassName('m-name'), q = document.getElementsByClassName('m-qty');
+    for(let i=0; i<s.length; i++) matRows += `|${s[i].value}|	{{${n[i].value}}}	|${q[i].value.toString().padStart(2,'0')}|	\n`;
+
+    const template = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
+Inside:	${v('iTech')} \nOutside: ${v('oTech')}
+{panel}
+{panel:title=Tests Completed:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
+Ruby 🚨: Yes | Light 💡: Yes | EXFO 📲: Yes | Wifi 🛜: Yes | Pair Test: Yes
+{panel}
+{panel:title=Installation Details:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
+*ONT Location*: Smart Panel | *ONT MAC*: ${v('ontMac')} | ONT Model: Nokia 10x-R
+*AP Location*: Living Room | *AP MAC*: ${v('apMac')} | AP Model: Nokia Beacon
+{panel}
+{panel:title=Cat5 Termination:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
+Lines Terminated: ${v('catTerm')} | Pair Tested: ${v('catPair')}
+_Location(s):_ Living Room 🛋️: ${v('lrPort')}
+{panel}
+{panel:title=Riser Info:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
+Floor: ${v('floor')} | Port: ${v('port')}
+{panel}
+{panel:title=Time on Site:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
+Start: ${v('startTime')} | End: ${v('endTime')} | *Total: ${duration}*
+{panel}
+{panel:title=Material List:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
+||_SAP_|| _Materials_ ||_QTY_||
+${matRows}{panel}
+{panel:title=Additional Notes:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}
+Hardware Return MAC: ${v('retMac')} [~res-orders]
+{panel}`;
+
+    document.getElementById('output').value = template;
+}
+
+function copyToClipboard() {
+    const out = document.getElementById("output");
+    out.select(); document.execCommand("copy");
+    alert("Full report copied!");
+}
+
+window.onload = initCatalog;
+</script>
+</body>
+</html>
         button.primary { padding: 12px 20px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold; }
         .btn-gen { background: #36b37e; color: white; }
         .btn-copy { background: var(--jira-blue); color: white; }
