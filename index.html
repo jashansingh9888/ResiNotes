@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beanfield Field Report Generator</title>
+    <style>
+        :root { --jira-green: #93cc94; --jira-blue: #0052cc; --jira-bg: #f4f5f7; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--jira-bg); padding: 10px; color: #172b4d; line-height: 1.4; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* Layout Sections */
+        .section { margin-bottom: 25px; padding: 15px; border: 1px solid #dfe1e6; border-radius: 5px; }
+        h3 { margin-top: 0; color: #0747a6; border-bottom: 2px solid var(--jira-green); padding-bottom: 5px; font-size: 16px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .field-group { display: flex; flex-direction: column; }
+        label { font-size: 11px; font-weight: bold; color: #5e6c84; margin-bottom: 4px; text-transform: uppercase; }
+        input { padding: 8px; border: 1px solid #dfe1e6; border-radius: 3px; font-size: 14px; }
+
+        /* Catalog Styling */
+        .catalog-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; background: #fafbfc; padding: 10px; border-radius: 5px; }
+        .cat-column h4 { margin: 5px 0; font-size: 13px; color: #505f79; text-decoration: underline; }
+        .item-btn { 
+            display: block; width: 100%; text-align: left; background: white; border: 1px solid #ddd; 
+            padding: 6px 8px; margin-bottom: 4px; font-size: 12px; cursor: pointer; border-radius: 3px;
+        }
+        .item-btn:hover { background: #eef9ee; border-color: var(--jira-green); }
+        .item-btn span { color: #888; font-family: monospace; float: right; }
+
+        /* Materials Table */
+        .mat-row { display: grid; grid-template-columns: 120px 1fr 60px 40px; gap: 8px; margin-bottom: 5px; align-items: center; }
+        .btn-del { background: #ff5630; color: white; border: none; padding: 5px; cursor: pointer; border-radius: 3px; }
+
+        /* Controls */
+        .controls { position: sticky; top: 0; background: white; padding: 15px 0; z-index: 100; border-bottom: 2px solid #eee; display: flex; gap: 10px; }
+        button.primary { padding: 12px 20px; border: none; border-radius: 3px; cursor: pointer; font-weight: bold; }
+        .btn-gen { background: #36b37e; color: white; }
+        .btn-copy { background: var(--jira-blue); color: white; }
+        
+        textarea { width: 100%; height: 200px; font-family: monospace; margin-top: 20px; padding: 15px; border: 2px dashed #ccc; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="controls">
+        <button class="primary btn-gen" onclick="generateMarkup()">Generate Jira Text</button>
+        <button class="primary btn-copy" onclick="copyToClipboard()">Copy to Clipboard</button>
+    </div>
+
+    <div class="grid section">
+        <div class="field-group"><label>Outside Tech</label><input type="text" id="oTech" value="Jashandeep Singh Sidhu"></div>
+        <div class="field-group"><label>Start Time</label><input type="time" id="startTime" value="11:15"></div>
+        <div class="field-group"><label>End Time</label><input type="time" id="endTime" value="12:00"></div>
+        <div class="field-group"><label>ONT MAC</label><input type="text" id="ontMac" placeholder="ALCL..."></div>
+    </div>
+
+    <h3>Quick-Add Materials (Click to add)</h3>
+    <div class="catalog-container section">
+        <div class="cat-column" id="cat-copper"><h4>Copper</h4></div>
+        <div class="cat-column" id="cat-fibre"><h4>Fibre</h4></div>
+        <div class="cat-column" id="cat-hardware"><h4>Hardware</h4></div>
+        <div class="cat-column" id="cat-other"><h4>Other</h4></div>
+    </div>
+
+    <h3>Active Material List</h3>
+    <div id="activeMaterials" class="section">
+        </div>
+
+    <textarea id="output" readonly placeholder="Markup will appear here..."></textarea>
+</div>
+
+<script>
+const catalog = {
+    copper: [
+        ["RJ45 Connector", "1000289"], ["2 Port Faceplate", "1001047"], ["4 Port Faceplate", "1001048"],
+        ["White Jacks", "1000520"], ["Coax Insert", "1001049"], ["3ft CAT5 Patch", "1000254"],
+        ["5ft CAT5 Patch", "1000497"], ["10ft CAT5 Patch", "1000253"]
+    ],
+    fibre: [
+        ["Fibre Jack", "1002322"], ["Heat Sleeve 40mm", "1000526"], ["LC APC Connector", "1001083"],
+        ["SC APC SC APC Patches", "1002388"], ["LC APC LC APC Patches", "1002335"], ["Heat Sleeve 25mm", "1002592"],
+        ["Heat Sleeve 50mm", "1002593"], ["APC LC APC SC Patches", "1002597"], ["SC APC Connector", "1001084"],
+        ["LC UPC 250/900", "1000422"], ["SC UPC", "1000476"], ["APC Bulk Heads", "1001079"], ["UPC Bulk Heads", "1000461"]
+    ],
+    hardware: [
+        ["5222XG Zhone", "1002324"], ["2424GN Zhone", "1002327"], ["2424A1 Zhone", "1001199"],
+        ["2424A Zhone", "100446"], ["2628A Zhone", "1001087"], ["8 port GPON zhone", "1001204"],
+        ["Nokia Beacon 19", "1002555"], ["Nokia XS-010X-R", "1002557"], ["Airties 4960x", "1002344"],
+        ["Airties 4960", "1002207"], ["Archer C20", "1002407"], ["AX23 TP Link", "1002481"], ["SML TV Box", "1001554"]
+    ],
+    other: [
+        ["A1 Zhone Mount", "1000420"], ["XGS / 2424GN Mount", "1002445"], ["Nokia ONT Mount-Fact", "1002573"],
+        ["Nokia VOIP Mount-Fact", "1002572"], ["Nokia ONT Mount-Cust", "1002589"], ["Nokia VOIP Mount-Cust", "1002590"],
+        ["RJ11 Splitter", "1000501"], ["HDMI Cable 6'", "1000952"], ["Power Extension", "1001208"]
+    ]
+};
+
+// Build Catalog Buttons
+Object.keys(catalog).forEach(cat => {
+    const col = document.getElementById(`cat-${cat}`);
+    catalog[cat].forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'item-btn';
+        btn.innerHTML = `${item[0]} <span>${item[1]}</span>`;
+        btn.onclick = () => addMaterial(item[0], item[1]);
+        col.appendChild(btn);
+    });
+});
+
+function addMaterial(name, sap) {
+    const container = document.getElementById('activeMaterials');
+    const div = document.createElement('div');
+    div.className = 'mat-row';
+    div.innerHTML = `
+        <input type="text" class="m-sap" value="${sap}">
+        <input type="text" class="m-name" value="${name}">
+        <input type="number" class="m-qty" value="1">
+        <button class="btn-del" onclick="this.parentElement.remove()">X</button>
+    `;
+    container.appendChild(div);
+}
+
+function calculateDuration(start, end) {
+    const s = start.split(':'), e = end.split(':');
+    const sd = new Date(0,0,0,s[0],s[1]), ed = new Date(0,0,0,e[0],e[1]);
+    let diff = ed.getTime() - sd.getTime();
+    if (diff < 0) diff += 86400000;
+    const h = Math.floor(diff/1000/60/60), m = Math.floor((diff/1000/60)%60);
+    return `${h}:${m < 10 ? '0' : ''}${m}:00`;
+}
+
+function generateMarkup() {
+    const saps = document.getElementsByClassName('m-sap'), names = document.getElementsByClassName('m-name'), qtys = document.getElementsByClassName('m-qty');
+    let matRows = "";
+    for(let i=0; i<saps.length; i++) {
+        matRows += `|${saps[i].value}|	{{${names[i].value}}}	|${qtys[i].value.toString().padStart(2, '0')}|	\n`;
+    }
+
+    const duration = calculateDuration(document.getElementById('startTime').value, document.getElementById('endTime').value);
+
+    const template = `{panel:title=Technician(s):|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+Outside:	${document.getElementById('oTech').value} 		
+{panel}
+{panel:title=Time on Site:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+* Start Time:	${document.getElementById('startTime').value}		
+* End Time:	${document.getElementById('endTime').value}		
+*Time on Site:	${duration}		
+{panel}
+{panel:title=Installation Details:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+*ONT MAC/SN*:	${document.getElementById('ontMac').value}
+{panel}			
+{panel:title=Material List:|borderStyle=solid|borderColor=#000|titleBGColor=#93cc94}			
+||_SAP_||	_Materials_	||_QTY_||	
+${matRows}
+{panel}`;
+    document.getElementById('output').value = template;
+}
+
+function copyToClipboard() {
+    const out = document.getElementById("output");
+    out.select(); document.execCommand("copy");
+    alert("Copied!");
+}
+</script>
+</body>
+</html>
